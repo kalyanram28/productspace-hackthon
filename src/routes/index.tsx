@@ -308,12 +308,12 @@ function Dashboard() {
               </div>
 
               <div className="panel p-5">
-                <h2 className="text-sm font-semibold">Sentiment trend</h2>
+                <h2 className="text-sm font-semibold">Sentiment trend (weekly)</h2>
                 <div className="mt-4 h-72">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={trend}>
                       <CartesianGrid stroke="var(--color-border)" />
-                      <XAxis dataKey="month" stroke="var(--color-muted-foreground)" fontSize={11} />
+                      <XAxis dataKey="week" stroke="var(--color-muted-foreground)" fontSize={11} />
                       <YAxis stroke="var(--color-muted-foreground)" fontSize={11} />
                       <Tooltip
                         contentStyle={{
