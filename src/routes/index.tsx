@@ -157,7 +157,16 @@ function Dashboard() {
     toast.info(`${added.length} new review${added.length > 1 ? "s" : ""} received`);
 
     const res = await analyze({
-      data: added.map ? { reviews: added.map(({ id, platform: p, reviewer, rating, text, date }) => ({ id, platform: p, reviewer, rating, text, date })) } : { reviews: [] },
+      data: {
+        reviews: added.map(({ id, platform: p, reviewer, rating, text, date }) => ({
+          id,
+          platform: p,
+          reviewer,
+          rating,
+          text,
+          date,
+        })),
+      },
     });
     const byId = new Map(res.results.map((r) => [r.id, r]));
     setReviews((prev) =>
