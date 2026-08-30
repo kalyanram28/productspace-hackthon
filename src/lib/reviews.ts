@@ -68,10 +68,14 @@ export function fallbackAnalyze(input: {
     input.rating >= 4 ? "Positive" : input.rating === 3 ? "Neutral" : "Negative";
 
   let issue = sentiment === "Positive" ? "Positive feedback" : "General dissatisfaction";
-  for (const [label, words] of ISSUE_KEYWORDS) {
-    if (words.some((w) => t.includes(w))) {
-      issue = label;
-      break;
+  // 5-star reviews are praise, not a complaint topic — keyword matching would
+  // mislabel them ("remembered my order" -> booking issue).
+  if (input.rating < 5) {
+    for (const [label, words] of ISSUE_KEYWORDS) {
+      if (words.some((w) => t.includes(w))) {
+        issue = label;
+        break;
+      }
     }
   }
 
