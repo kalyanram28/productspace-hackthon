@@ -68,10 +68,14 @@ export function fallbackAnalyze(input: {
     input.rating >= 4 ? "Positive" : input.rating === 3 ? "Neutral" : "Negative";
 
   let issue = sentiment === "Positive" ? "Positive feedback" : "General dissatisfaction";
-  for (const [label, words] of ISSUE_KEYWORDS) {
-    if (words.some((w) => t.includes(w))) {
-      issue = label;
-      break;
+  // 5-star reviews are praise, not a complaint topic — keyword matching would
+  // mislabel them ("remembered my order" -> booking issue).
+  if (input.rating < 5) {
+    for (const [label, words] of ISSUE_KEYWORDS) {
+      if (words.some((w) => t.includes(w))) {
+        issue = label;
+        break;
+      }
     }
   }
 
@@ -150,16 +154,27 @@ export function issueStats(reviews: Review[]): IssueStat[] {
     .sort((a, b) => b.count - a.count);
 }
 
-/** Monthly sentiment trend, oldest first. */
+/** Weekly sentiment trend (week starting Monday), oldest first. */
 export function sentimentTrend(reviews: Review[]) {
-  const map = new Map<string, { month: string; Positive: number; Neutral: number; Negative: number }>();
+  const weekStart = (iso: string) => {
+    const d = new Date(`${iso}T00:00:00Z`);
+    const day = (d.getUTCDay() + 6) % 7; // Monday = 0
+    d.setUTCDate(d.getUTCDate() - day);
+    return d.toISOString().slice(0, 10);
+  };
+  const map = new Map<
+    string,
+    { week: string; Positive: number; Neutral: number; Negative: number }
+  >();
   for (const r of reviews) {
-    const key = r.date.slice(0, 7);
-    const e = map.get(key) ?? { month: key, Positive: 0, Neutral: 0, Negative: 0 };
+    const key = weekStart(r.date);
+    const e = map.get(key) ?? { week: key.slice(5), Positive: 0, Neutral: 0, Negative: 0 };
     e[r.sentiment] += 1;
     map.set(key, e);
   }
-  return [...map.values()].sort((a, b) => a.month.localeCompare(b.month));
+  return [...map.entries()]
+    .sort((a, b) => a[0].localeCompare(b[0]))
+    .map(([, v]) => v);
 }
 
 /** Parse pasted CSV or JSON into raw review rows. */

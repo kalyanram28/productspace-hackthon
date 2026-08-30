@@ -3,9 +3,15 @@
  * Returns parsed JSON from the model, or throws so callers can fall back.
  */
 const GATEWAY = "https://ai.gateway.lovable.dev/v1/chat/completions";
-const MODEL = "google/gemini-3.7-flash";
+const DEFAULT_MODEL = "google/gemini-3.7-flash";
+/** Cheapest/fastest catalog model — used for bulk classification. */
+export const FAST_MODEL = "google/gemini-3.1-flash-lite";
 
-export async function chatJson<T>(system: string, user: string): Promise<T> {
+export async function chatJson<T>(
+  system: string,
+  user: string,
+  model: string = DEFAULT_MODEL,
+): Promise<T> {
   const key = process.env["LOVABLE_API_KEY"];
   if (!key) throw new Error("Missing LOVABLE_API_KEY");
 
@@ -17,7 +23,7 @@ export async function chatJson<T>(system: string, user: string): Promise<T> {
       "X-Lovable-AIG-SDK": "fetch",
     },
     body: JSON.stringify({
-      model: MODEL,
+      model,
       response_format: { type: "json_object" },
       messages: [
         { role: "system", content: system },

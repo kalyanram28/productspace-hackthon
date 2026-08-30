@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { chatJson } from "./ai-gateway.server";
+import { chatJson, FAST_MODEL } from "./ai-gateway.server";
 import { fallbackAnalyze, fallbackDraft } from "./reviews";
 
 const AnalyzeInput = z.object({
@@ -36,7 +36,7 @@ export const analyzeReviews = createServerFn({ method: "POST" })
     try {
       const out = await chatJson<{
         results: Array<{ id: string; sentiment: string; issue: string; severity: string }>;
-      }>(ANALYZE_SYSTEM, JSON.stringify(data.reviews));
+      }>(ANALYZE_SYSTEM, JSON.stringify(data.reviews), FAST_MODEL);
 
       const byId = new Map(out.results.map((r) => [r.id, r]));
       return {
