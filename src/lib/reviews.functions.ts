@@ -1,7 +1,7 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-import { chatJson } from "./ai-gateway.server";
+import { chatJson, FAST_MODEL } from "./ai-gateway.server";
 import { fallbackAnalyze, fallbackDraft } from "./reviews";
 
 const AnalyzeInput = z.object({
